@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Paint</title>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <style type="text/css">
+            html, body {
+                padding: 0;
+                margin: 0;
+            }
+            body {
+                background-color: #eee;
+            }
+            .tools {
+                display: flex;
+                align-items: center;
+                width: 90%;
+                margin: 0 auto;
+                padding: 10px;
+                border-bottom: 1px solid #ccc;
+            }
+            .palette {
+                display: flex;
+                padding: 0;
+                margin: 0;
+                margin-right: 10px;
+            }
+            .palette__item {
+                width: 20px;
+                height: 20px;
+                list-style: none;
+                margin: 5px;
+                border: 1px solid transparent;
+            }
+            .active {
+                transform:scale(1.3);
+                border: 1px solid red;
+            }
+            .choose {
+                margin-right: 20px;
+            }
+            .clear {
+                outline: none;
+                margin-left: auto;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="tools">
+            <ul class="palette">
+                <li class="palette__item active" style="background-color: black;"></li>
+                <li class="palette__item" style="background-color: red;"></li>
+                <li class="palette__item" style="background-color: blue;"></li>
+                <li class="palette__item" style="background-color: green;"></li>
+                <li class="palette__item" style="background-color: yellow;"></li>
+                <li class="palette__item" style="background-color: white;"></li>
+            </ul>
+            <label> or choose <input type="color" class="choose"></label>
+            <button class="clear" type="button">Clear</button>
+        </div>
+        <canvas id="draw"></canvas>
+
+        <script type="text/javascript">
+            const palette = document.querySelectorAll('.palette__item');
+            const clear = document.querySelector('.clear');
+            const choose = document.querySelector('.choose');
+            const canvas = document.querySelector('#draw');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            ctx.strokeStyle = 'black';
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.lineWidth = 10;
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+            let hue = 0;
+
+            function draw(e) {
+                if (!isDrawing) return;
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.stroke();
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            }
+
+            function pickColor(e) {
+                ctx.strokeStyle = e.target.style.backgroundColor;
+                palette.forEach(item => {
+                    item.className = 'palette__item';
+                });
+                e.target.className = 'palette__item active'
+            }
+
+            function chooseColor(e) {
+                ctx.strokeStyle = e.target.value;
+                palette.forEach(item => {
+                    item.className = 'palette__item';
+                });
+            }
+
+            function clearCanvas() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+
+            canvas.addEventListener('mousedown', (e) => {
+                isDrawing = true;
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            });
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', () => isDrawing = false);
+            canvas.addEventListener('mouseout', () => isDrawing = false);
+            palette.forEach(item => {
+                item.addEventListener('click', pickColor);
+            });
+            choose.addEventListener('change', chooseColor);
+            clear.addEventListener('click', clearCanvas);
+
+        </script>
+    </body>
+</html>
